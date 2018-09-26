@@ -1,0 +1,144 @@
+<style lang="less">
+.table-wrap{
+    border: 1px solid #ddd;
+    border-bottom: none;
+    margin:0;
+    padding: 0;
+    .sub-wrap{
+        width: 100%;
+        min-height: 80px;
+        border-left:1px solid #ddd;
+    }
+    .m-sub-wrap{
+        display: inline-block;
+        .sub-title{
+            display: inline-block;
+            width:auto
+        }
+    }
+    .title{
+        width: 100px;
+        text-align:center
+    }
+}
+.table-wrap:last-child{
+    border-bottom: 1px solid #ddd;
+}
+</style>
+
+<template>
+        <div class="inline">
+            <Poptip
+                confirm
+                title="确定要删除吗?"
+                @on-ok="ok"
+                v-model='visibel'
+            >
+                <Badge :count="cardTypeIds.length" style='margin-right:30px;'>
+                    <Tag
+                        type="dot"
+                        :closable="handleClose(item.brandId)"
+                        color="yellow"
+                        @on-close='visibel=true'
+                        @click.native='view'
+                    >{{item.brandName}}</Tag>
+                </Badge>
+            </Poptip>
+            <Modal
+                v-model='typeChooseConfig.modal'
+                width="45vw"
+                :closable='false'
+                :loading='typeChooseConfig.loading'
+                :mask-closable='false'
+                :title='"选择车型-"+item.brandName'
+            >
+
+                    <div  v-for='(x,xi) in item.carsList' class="table-wrap flex item-center">
+                        <h2 class="title main-title" >{{x.carsName}}</h2>
+                        <div class="sub-wrap flex item-center" v-if='x.cardTypeList'>
+                            <CheckboxGroup v-model="cardTypeIds">
+                                <div   v-for='(xl,xli) in x.cardTypeList' class="m-sub-wrap padding-xs">
+                                    <Checkbox :label='xl.cardTypeId' :disabled='handelDisable(item.brandId,xl.cardTypeId)'>
+                                        <h2  class="title sub-title">{{xl.cardTypeName}}</h2>
+                                    </Checkbox>
+                                </div>
+                            </CheckboxGroup>
+                        </div>
+                        <div class="sub-wrap" v-else></div>
+                    </div>
+
+                <div slot="footer">
+                    <Button type="primary" @click='save'>确定</Button>
+                </div>
+            </Modal>
+        </div>
+
+</template>
+
+<script>
+
+export default {
+    name: 'brandBox',
+    props:["item"],
+    components: {
+    },
+    data () {
+        return {
+            checked:true,
+            typeChooseConfig:{
+               modal:false,
+               name:"typeChooseConfig",
+               loading:false
+            },
+            visibel:false,
+            cardTypeIds:[],
+            allData:{},
+        }
+    },
+    mounted () {
+        this.cardTypeIds = this.utils.getData("typeMap")[this.item.brandId];
+    },
+    methods: {
+        handelDisable(brandId,cardTypeId){
+            let tmp = this.utils.getData("aimTypeIdS");
+            if(tmp.indexOf(cardTypeId) != -1){
+                return true
+            }else{
+                return false
+            }
+        },
+        handleClose(id){
+            let tmp = this.utils.getData("aimIdsS");
+            if(tmp.indexOf(id) == -1){
+                return true
+            }else{
+                return false
+            }
+        },
+        ok(){
+            this.$Event.$emit('delBrand',this.item.brandId)
+        },
+        save(){
+            let list = this.utils.getData("typeMap");
+            list[this.item.brandId] = this.cardTypeIds;
+            this.utils.setData("typeMap",list);
+            //收集aimTypeId
+            let aimTypeId = [];
+            let typeMap = this.utils.getData("typeMap");
+            console.log(typeMap)
+
+            for(let o in typeMap){
+                if(typeMap[o].length>0){
+                     aimTypeId = aimTypeId.concat(typeMap[o]);
+                };
+            };
+            aimTypeId = $.unique(aimTypeId)
+            this.utils.setData("aimTypeId",aimTypeId);
+            this.typeChooseConfig.modal = false;
+        },
+        view(){
+            this.typeChooseConfig.modal = true;
+        }
+    }
+};
+</script>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>晴天修车商家版后台管理</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <link href="./static/img/icon.png" mce_href="favicon.ico" rel="bookmark" type="image/x-icon" />
+    <link href="./static/img/icon.png" mce_href="favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="./static/img/icon.png" mce_href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css" />
+    <link rel="stylesheet" href="/dist/main.css">
+    <link rel="stylesheet" name="theme" href="">
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=iTFrUHZGDDx2iviWfFYGAf0HTyvt6tma"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        window.Host = '/api/'
+    </script>
+    <script type="text/javascript" src="/dist/vender-base.js"></script>
+    <script type="text/javascript" src="/dist/vender-exten.js"></script>
+    <script type="text/javascript" src="/dist/main.js"></script>
+</body>
+
+</html>

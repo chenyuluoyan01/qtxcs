@@ -1,0 +1,196 @@
+<style lang="less">
+
+</style>
+
+<template>
+    <div>
+        <div class="i-form">
+            <Form :ref="formData.rel" :model="formData.rel" :label-width="120">
+                <FormItem label="服务分类：" class="formMust" >
+                   <Select v-model='formData.rel.itemCat'  style='width:200px;'>
+                     <Option v-for='(todo,i) in formData.itemCatList.list' :key='"1xd"+i' :value='todo[formData.itemCatList.listId]'>{{todo[formData.itemCatList.listName]}}</Option>
+                   </Select>
+                    <span v-if='formData.initF&&formData.rel.itemCat==""' class="error-mark">
+                    <Icon type="close-circled"></Icon> 必填
+                    </span>
+                </FormItem>
+                <FormItem label="项目分类：" class="formMust" v-if='itemStatus'>
+                   <Select v-model='formData.rel.itemCode'  style='width:200px;'>
+                     <Option v-for='(todo,i) in formData.itemCodeList.list' :key='"1xd"+i' :value='todo[formData.itemCodeList.listId]'>{{todo[formData.itemCodeList.listName]}}</Option>
+                   </Select>
+                    <span v-if='formData.initF&&formData.rel.itemCode == ""' class="error-mark">
+                    <Icon type="close-circled"></Icon> 必填
+                    </span>
+                </FormItem>
+                <FormItem label="品牌名称：" class="formMust">
+                   <Select v-model='formData.rel.goodsBrandId'  style='width:200px;'>
+                     <Option v-for='(todo,i) in formData.brandList.list' :key='"1xd"+i' :value='todo[formData.brandList.listId]'>{{todo[formData.brandList.listName]}}</Option>
+                   </Select>
+                    <span v-if='formData.initF&&formData.rel.goodsBrandId == ""' class="error-mark">
+                    <Icon type="close-circled"></Icon> 必填
+                    </span>
+                </FormItem>
+                <FormItem label="商品名：" class="formMust">
+                    <Input v-model="formData.rel.goodsName" placeholder="请输入商品名称" style="width:320px;"></Input>
+                    <span v-if='formData.initF && formData.rel.goodsName == ""' class="error-mark">
+                        <Icon type="close-circled"></Icon> 必填
+                    </span>
+                </FormItem>
+                <FormItem label="商品图片：" class="formMust">
+                    <upload
+                        v-if='formData.imgUpConfig.status'
+                        :count="formData.imgUpConfig.count"
+                        :defaultList="formData.imgUpConfig.defaultList"
+                        :fileDir='formData.imgUpConfig.fileDir'
+                        @upList="getUpList"
+                    ></upload>
+                    <span v-if='formData.initF && formData.rel.goodsPictureIdArr.length==0' class="error-mark">
+                        <Icon type="close-circled"></Icon> 必填
+                    </span>
+                    <label style="font-size:12px">*首张图片为主图，最多可上传6正图片图片尺寸800x800，大小不超过1M</label>
+                </FormItem>
+
+                <FormItem label="参考价：" class="formMust">
+                    <InputNumber :min='0'  v-model="formData.rel.refPrice" placeholder="请输入参考价" style="width:220px;"></InputNumber>
+                    <span v-if='formData.initF && formData.rel.refPrice == ""' class="error-mark">
+                        <Icon type="close-circled"></Icon> 必填
+                    </span>
+                </FormItem>
+                <FormItem label="添加方式：" class="formMust">
+                    <RadioGroup v-model='goodType'>
+                        <Radio label='carType'>按车型</Radio>
+                        <Radio label='priceType'>按价位</Radio>
+                    </RadioGroup>
+                </FormItem>
+                <FormItem label="上架：" class="formMust">
+                    <RadioGroup v-model='formData.rel.putaway'>
+                        <Radio label='N'>否</Radio>
+                        <Radio label='Y'>是</Radio>
+                    </RadioGroup>
+                </FormItem>
+                <FormItem label="适用全部车型：" class="formMust">
+                    <RadioGroup v-model='formData.rel.applyAllCar'>
+                        <Radio label='N'>否</Radio>
+                        <Radio label='Y'>是</Radio>
+                    </RadioGroup>
+                </FormItem>
+                <FormItem label="适用车型：" class="formMust">
+
+                </FormItem>
+            </Form>
+        </div>
+    </div>
+</template>
+
+<script>
+import {upload} from '@/core'
+export default {
+    name: 'bannerUpdate',
+    props:["name","detail"],
+    components: {
+        upload
+    },
+    watch:{
+        'formData.rel.itemCat' :function(itemCat){
+            this.get(Api.server.get,{itemCat:itemCat},(res)=>{
+                this.formData.itemCodeList.list = res.object || [];
+                this.itemStatus = false;
+                $Vue.nextTick(()=>{
+                    this.itemStatus = true;
+                })
+            })
+        }
+    },
+    data () {
+        return {
+            itemStatus:true,
+            goodType:'carType',
+            formData:{
+                imgUpConfig:{
+                    status:false,
+                    count:6,
+                    defaultList:[],
+                    fileDir:'goods'
+                },
+                itemCodeList:{
+                    listId:"itemCode",
+                    listName:"itemName",
+                    list:[]
+                },
+                brandList:{
+                    listId:"goodsBrandId",
+                    listName:"goodsBrandName",
+                    list:[]
+                },
+                itemCatList:{
+                    listId:"id",
+                    listName:"name",
+                    list:[
+                        {
+                            name:"保养项目",
+                            id:"BYXM"
+                        },
+                        {
+                            name:"清洗养护",
+                            id:"QXYH"
+                        },
+                        {
+                            name:"维修项目",
+                            id:"WXXM"
+                        }
+                    ]
+                },
+                initF:false,
+                rel:{
+                    goodsBrandId:"",
+                    goodsId:"",
+                    itemCat:"",
+                    itemCode:"",
+                    goodsName:"",
+                    refPrice:0,
+                    applyAllCar:'N',
+                    putaway:'N',
+                    goodsPictureIdArr:[],
+                    goodsCarIdArr:""
+                }
+            }
+        }
+    },
+    mounted () {
+        //设置初始时间
+        //this.formData.rel.distributedTime = this.utils.formatDate(new Date())
+        this.handleInit()
+    },
+    methods: {
+        handleInit(){
+            let d = this.detail;
+            this.getBrand();
+            this.formData.rel = this.utils.getObjByKeys(this.formData.rel,this.detail);
+            //特殊字段设置
+            this.formData.imgUpConfig.defaultList = JSON.parse(d.goodsPictureIdArr);
+            this.formData.imgUpConfig.status = true;
+        },
+        getBrand(){
+            this.get(Api.goods.brand.get,(res)=>{
+                this.formData.brandList.list = res.object || [];
+            })
+        },
+        getUpList(url){
+            this.formData.rel.goodsPictureIdArr = this.utils.getSingleItem(url,'url');
+        },
+        save(){
+            let _this = this;
+            this.utils.resolveForm(_this,()=>{
+                let data = JSON.parse(JSON.stringify(this.formData.rel))
+                data.goodsPictureIdArr = JSON.stringify(data.goodsPictureIdArr);
+                console.log(data)
+                this.post(Api.goods.update,data,(res)=>{
+                    this.$Message.success("修改商品成功！");
+                    this.$parent.$parent.getData()
+                    //this.utils.refshData(_this.$parent.$parent);
+                });
+            });
+        },
+    }
+};
+</script>

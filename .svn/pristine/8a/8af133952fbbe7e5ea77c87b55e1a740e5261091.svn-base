@@ -1,0 +1,106 @@
+<style lang="less">
+</style>
+
+<template>
+    <div class="view-main">
+        <!--列表页面-->
+        <div class="list-page">
+            <!--搭电救援-->
+            <div class="padding-middle" v-if='$route.name == "rush_hellp_dd"'>
+                <Form>
+                    <FormItem label="开启搭电救援：">
+                        <RadioGroup v-model='powerFix'>
+                            <Radio label="Y">开启</Radio>
+                            <Radio label="N">关闭</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                    <FormItem label="单次救援价格：">
+                        {{powerPrice}} 元
+                    </FormItem>
+                    <FormItem>
+                        <Button type='primary' size='small' @click='save(dd,{powerFix:powerFix})'>确定</Button>
+                    </FormItem>
+                </Form>
+            </div>
+
+
+            <!--拖车救援-->
+            <div class="padding-middle" v-if='$route.name == "rush_hellp_tc"'>
+                <Form>
+                    <FormItem label="开启拖车服务：">
+                        <RadioGroup v-model='towingService'>
+                            <Radio label="Y">开启</Radio>
+                            <Radio label="N">关闭</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                    <FormItem label="公里计算：">
+                        {{minimumKm}} km内 {{priceMinimumKm}} 元/次，超出部分按 {{pricePerKm}} 元/公里计算
+                    </FormItem>
+                    <FormItem>
+                        <Button type='primary' size='small' @click='save(tc,{towingService:towingService})'>确定</Button>
+                    </FormItem>
+                </Form>
+            </div>
+
+            <!--换胎救援-->
+            <div class="padding-middle" v-if='$route.name == "rush_hellp_ht"'>
+                <Form>
+                    <FormItem label="开启换胎服务：">
+                        <RadioGroup v-model='changeTyre'>
+                            <Radio label="Y">开启</Radio>
+                            <Radio label="N">关闭</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                    <FormItem label="单次换胎价格： ">
+                        {{priceChangeTyre}} 元
+                    </FormItem>
+                    <FormItem>
+                        <Button type='primary' size='small' @click='save(ht,{changeTyre:changeTyre})'>确定</Button>
+                    </FormItem>
+                </Form>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import {zPage} from '@/core'
+
+export default {
+    name: 'demo',
+    components: {
+        zPage
+    },
+    data () {
+        return {
+            powerPrice:0,
+            priceChangeTyre:0,
+            minimumKm:0,
+            priceMinimumKm:0,
+            pricePerKm:0,
+            powerFix:"N",
+            towingService:"N",
+            changeTyre:"N",
+            dd:Api.factory.rush.dd,
+            tc:Api.factory.rush.tc,
+            ht:Api.factory.rush.ht
+        };
+    },
+    mounted () {
+        this.getData()
+    },
+    methods: {
+        //分页组件吐出数据
+        getData: function(){
+            this.post(Api.factory.rush.get,res=>{
+
+            })
+        },
+        save: function(url,data){
+            this.post(url,data,res=>{
+                this.$Message.success("操作成功！")
+            });
+        }
+    }
+};
+</script>

@@ -1,0 +1,216 @@
+import Main from '@/views/Main.vue';
+import Api from '@/libs/api/api.js'
+// 不作为Main组件的子页面展示的页面单独写，如下
+export const loginRouter = {
+    path: '/login',
+    name: 'login',
+    meta: {
+        title: '晴天修车后台管理系统-登录'
+    },
+    component: () => import('@/views/qtxc/login/loginMain')
+};
+
+export const page404 = {
+    path: '/*',
+    name: 'error-404',
+    meta: {
+        title: '404-页面不存在'
+    },
+    component: () => import('@/views/error-page/404.vue')
+};
+
+export const page403 = {
+    path: '/403',
+    meta: {
+        title: '403-权限不足'
+    },
+    name: 'error-403',
+    component: () => import('@//views/error-page/403.vue')
+};
+
+export const page500 = {
+    path: '/500',
+    meta: {
+        title: '500-服务端错误'
+    },
+    name: 'error-500',
+    component: () => import('@/views/error-page/500.vue')
+};
+
+export const preview = {
+    path: '/preview',
+    name: 'preview',
+    component: () => import('@/views/form/article-publish/preview.vue')
+};
+
+export const locking = {
+    path: '/locking',
+    name: 'locking',
+    component: () => import('@/views/main-components/lockscreen/components/locking-page.vue')
+};
+
+// 作为Main组件的子页面展示但是不在左侧菜单显示的路由写在otherRouter里
+export const otherRouter = {
+    path: '/',
+    name: 'otherRouter',
+    redirect: '/home',
+    component: Main,
+    children: [
+        { path: 'home', title: {i18n: 'home'}, name: 'home_index', component: () => import('@/views/home/home.vue') },
+        { path: 'ownspace', title: '个人中心', name: 'ownspace_index', component: () => import('@/views/own-space/own-space.vue') },
+        { path: 'order/:order_id', title: '订单详情', name: 'order-info', component: () => import('@/views/advanced-router/component/order-info.vue') }, // 用于展示动态路由
+        { path: 'shopping', title: '购物详情', name: 'shopping', component: () => import('@/views/advanced-router/component/shopping-info.vue') }, // 用于展示带参路由
+        { path: 'message', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') }
+    ]
+};
+
+// 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
+// 去后台获取到服务项然后根据服务项目生成路由表
+
+export const appRouter = [
+  //保养报表
+    {
+        path: '/serverMeg',
+        icon: 'document-text',
+        title: '保养项目',
+        name: 'maintenance_project',
+        expand: true,
+        component: Main,
+        children: [
+            {
+                path: 'maintenanceProject',
+                title: '保养项目',
+                code:"byxm",
+                name: 'maintenance_project_sub',
+                component: () => import('@/views/qtxc/serverMeg/maintenanceProject/maintenanceProject.vue')
+            }
+        ]
+    },
+    //清洗项目
+    {
+        path: '/serverMeg',
+        icon: 'document-text',
+        title: '清洗项目',
+        name: 'clean_project',
+        expand: true,
+        component: Main,
+        children: [
+            {
+                path: 'cleanProject',
+                title: '清洗项目',
+                code:"qxxm",
+                name: 'clean_project_sub',
+                component: () => import('@/views/qtxc/serverMeg/cleanProject/cleanProject.vue')
+            }
+        ]
+    },
+    //维修项目
+    {
+        path: '/serverMeg',
+        icon: 'document-text',
+        title: '维修项目',
+        name: 'repair_project',
+        expand: true,
+        component: Main,
+        children: [
+            {
+                path: 'repairProject',
+                title: '维修项目',
+                code:"wxxm",
+                name: 'repair_project_sub',
+                component: () => import('@/views/qtxc/serverMeg/repairProject/repairProject.vue')
+            },
+        ]
+    },
+    //钣金项目
+    {
+        path: '/serverMeg',
+        icon: 'document-text',
+        title: '钣金项目',
+        name: 'sheet_metal_spray_paint',
+        expand: true,
+        component: Main,
+        children: [
+            {
+                path: 'sheetMetalSprayPaint',
+                title: '钣金喷漆',
+                code:"bjpq",
+                name: 'sheet_metal_spray_paint_sub',
+                component: () => import('@/views/qtxc/serverMeg/sheetMetalSprayPaint/sheetMetalSprayPaint.vue')
+            },
+        ]
+    },
+
+
+    //紧急救援
+    {
+        path: '/serverMeg',
+        icon: 'document-text',
+        title: '紧急救援',
+        name: 'rush_hellp',
+        expand: true,
+        component: Main,
+        children: [
+            {
+                path: 'rushHellpDD',
+                title: '搭电',
+                code:"jjjy",
+                name: 'rush_hellp_dd',
+                component: () => import('@/views/qtxc/serverMeg/rushHellp/rushHellp.vue')
+            },
+            {
+                path: 'rushHellpTC',
+                title: '拖车',
+                code:"jjjy",
+                name: 'rush_hellp_tc',
+                component: () => import('@/views/qtxc/serverMeg/rushHellp/rushHellp.vue')
+            },
+            {
+                path: 'rushHellpHT',
+                title: '换胎',
+                code:"jjjy",
+                name: 'rush_hellp_ht',
+                component: () => import('@/views/qtxc/serverMeg/rushHellp/rushHellp.vue')
+            }
+        ]
+    },
+    //店铺管理
+    {
+        path: '/storeMeg',
+        icon: 'gear-b',
+        title: '店铺设置',
+        name: 'storeMeg',
+        expand: true,
+        component: Main,
+        children: [
+            {
+                path: 'storeSets',
+                title: '店铺设置',
+                code:"rygl",
+                name: 'store_set',
+                component: () => import('@/views/qtxc/storeMeg/storeSet/storeSet.vue')
+            },
+            {
+                path: 'opLog',
+                title: '操作日志',
+                code:"czrz",
+                name: 'op_logs',
+                component: () => import('@/views/qtxc/storeMeg/opLogs/opLogs.vue')
+            }
+        ]
+    },
+];
+//console.log()
+// 所有上面定义的路由都要写在下面的routers里
+export const routers = [
+    loginRouter,
+    otherRouter,
+    preview,
+    locking,
+    ...appRouter,
+    page500,
+    page403,
+    page404
+];
+
+export default appRouter

@@ -1,0 +1,341 @@
+<style lang="less">
+    @import "./main.less";
+    .main-breadcrumb{
+        line-height: 60px;
+        span,a{
+            color:#efefef;
+            font-size:14px;
+        }
+        span:hover,a:hover{
+            color:#fff;
+        }
+    };
+    .demo-spin-icon-load{
+        animation: ani-demo-spin 1s linear infinite;
+    }
+    @keyframes ani-demo-spin {
+        from { transform: rotate(0deg);}
+        50%  { transform: rotate(180deg);}
+        to   { transform: rotate(360deg);}
+    }
+    .demo-spin-col{
+        height: 100px;
+        position: relative;
+        border: 1px solid #eee;
+    }
+</style>
+<template>
+    <div>
+       <Spin fix style='z-index:999999999999999999999999999999999' v-if='statusInit'>
+            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+            <div>Loading</div>
+        </Spin>
+        <div class="main" :class="{'main-hide-text': shrink}">
+            <div class="sidebar-menu-con" :style="{width: shrink?'60px':'200px', overflow: shrink ? 'visible' : 'auto'}">
+                <shrinkable-menu
+                    v-if = 'menuStatus'
+                    :shrink="shrink"
+                    @on-change="handleSubmenuChange"
+                    :theme="menuTheme"
+                    :before-push="beforePush"
+                    :open-names="openedSubmenuArr"
+                    :menu-list="menuList">
+
+                    <!---转换开关-->
+                    <div slot="top" class="navicon-con" style="padding:8px;padding-top:12px;padding-bottom:13px;position:fixed;top:60px;padding-left:4px;background:#b24317;transition:width .3s;" :style="{width: shrink?'60px':'200px'}">
+                        <Tooltip content="展开" placement="top" :disabled="!shrink" :delay="600">
+                            <Button :style="{transform: 'rotateZ(' + (this.shrink ? '-90' : '0') + 'deg)'}" style='background:#ec681e;margin-left:0;position:relative;top:1px;left:8px;padding:0;padding-left:6px;padding-right:6px;' type="text" @click="toggleClick">
+                                <Icon type="navicon" size="32" style='color:#fff;'></Icon>
+                            </Button>
+                        </Tooltip>
+                        <span v-if='delayS' style="font-size:16px;padding-left:20px;color:#fff;position:relative;top:4px;transition:all .3s">展开/隐藏</span>
+                    </div>
+                    <!---转换开关-->
+
+                </shrinkable-menu>
+            </div>
+            <div class="main-header-con" :style="{paddingLeft: '0px'}">
+                <div class="main-header">
+                    <div style="padding:8px;width:200px;">
+                        <img style="height:44px;" src="../images/logo.png" key="max-logo" />
+                    </div>
+                    <div class="header-middle-con" style="padding-left:0;">
+                        <span style="display:inline-block;width:2px;height:40px;background:#ccc;"></span>
+                        <span style="font-size:22px;padding-left:20px;position:relative;top:-10px;color:#555">商家管理后台</span>
+                    </div>
+
+                    <div class="header-avator-con">
+                    <!--全屏，锁屏，消息提示-->
+                        <!-- <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
+                        <lock-screen></lock-screen>
+                        <message-tip v-model="mesCount"></message-tip> -->
+                    <!--全屏，锁屏，消息提示-->
+                        <theme-switch v-show='false'></theme-switch>
+
+                    <!--个人中心组件-->
+                        <div class="user-dropdown-menu-con">
+                            <Row type="flex" justify="end" align="middle" class="user-dropdown-innercon">
+                                <Dropdown transfer trigger="click" @on-click="handleClickUserDropdown">
+                                    <a href="javascript:void(0)">
+                                        <span class="main-user-name">{{ userName }}</span>
+                                        <Icon type="arrow-down-b"></Icon>
+                                    </a>
+                                    <DropdownMenu slot="list">
+                                        <DropdownItem name="ownSpace">个人中心</DropdownItem>
+                                        <DropdownItem name="loginout" divided>退出登录</DropdownItem>
+                                    </DropdownMenu>
+                                </Dropdown>
+                                <Avatar :src="avatorPath" style="background: #619fe7;margin-left: 10px;"></Avatar>
+                            </Row>
+                        </div>
+                    <!--个人中心组件-->
+
+                    </div>
+                </div>
+
+                <!--浏览记录组建-->
+                   <!--  <div class="tags-con">
+                       <tags-page-opened :pageTagsList="pageTagsList"></tags-page-opened>
+                   </div> -->
+                <!--浏览记录组建-->
+
+            </div>
+            <div class="single-page-con" :style="{left: shrink?'60px':'200px'}">
+
+                <div class="single-page">
+                    <div style='width:100%;background:#ec681e;height:68px;position:fixed;top:52px;left:0;z-index:99;'>
+                        <div class="header-middle-con" style="position:absolute":style="{left: shrink?'60px':'200px'}">
+                            <div class="main-breadcrumb">
+                                <breadcrumb-nav :currentPath="currentPath"></breadcrumb-nav>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <keep-alive :include="cachePage"> -->
+                        <router-view v-if='status' style='width:100vw;height:100vh;overflow-y:auto;position:fixed;top:0;left:0;padding-top:140px; background:#fff' :style="{paddingLeft: shrink?'80px':'220px',}"></router-view>
+                    <!-- </keep-alive> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    import Vue from 'vue'
+    import shrinkableMenu from './main-components/shrinkable-menu/shrinkable-menu.vue';
+    import tagsPageOpened from './main-components/tags-page-opened.vue';
+    import breadcrumbNav from './main-components/breadcrumb-nav.vue';
+    import fullScreen from './main-components/fullscreen.vue';
+    import lockScreen from './main-components/lockscreen/lockscreen.vue';
+    import messageTip from './main-components/message-tip.vue';
+    import themeSwitch from './main-components/theme-switch/theme-switch.vue';
+    import Cookies from 'js-cookie';
+    import util from '@/libs/util.js';
+    import {appRouter} from '@/router/router';
+    import '@/libs/common.js'
+    export default {
+        components: {
+            shrinkableMenu,
+            tagsPageOpened,
+            breadcrumbNav,
+            fullScreen,
+            lockScreen,
+            messageTip,
+            themeSwitch,
+
+        },
+        data () {
+            return {
+                statusInit:true,
+                menuStatus: false,
+                shrink: false,
+                delayS:true,
+                status: false,
+                userName: '',
+                isFullScreen: false,
+                openedSubmenuArr: this.$store.state.app.openedSubmenuArr,
+                menuList:[],
+            }
+        },
+        computed: {
+            pageTagsList () {
+                return this.$store.state.app.pageOpenedList; // 打开的页面的页面对象
+            },
+            currentPath () {
+                return this.$store.state.app.currentPath; // 当前面包屑数组
+            },
+            avatorPath () {
+                return localStorage.avatorImgPath;
+            },
+            cachePage () {
+                return this.$store.state.app.cachePage;
+            },
+            lang () {
+                return this.$store.state.app.lang;
+            },
+            menuTheme () {
+                return this.$store.state.app.menuTheme;
+            },
+            mesCount () {
+                return this.$store.state.app.messageCount;
+            }
+        },
+        methods: {
+            menuCofig (){
+                this.post(Api.server.get,(res)=>{
+                    let map = res.object;
+                    let list = this.utils.assign(appRouter);
+                    localStorage.setItem("firstItemCode",map.BYXM[0].itemCode);
+                    //保养项目路由
+                    for(let i in map.BYXM){
+                        list[0].children.push(this.utils.assign(list[0].children[0]));
+                    };
+                    list[0].children.pop();
+                    for(let i in list[0].children){
+                        list[0].children[i].title = map.BYXM[i].itemName;
+                        list[0].children[i].name = map.BYXM[i].itemCode;
+                    };
+                    //清洗项目路由
+                    for(let i in map.QXYH){
+                        list[1].children.push(this.utils.assign(list[1].children[0]));
+                    };
+                    list[1].children.pop();
+                    for(let i in list[1].children){
+                        list[1].children[i].title = map.QXYH[i].itemName;
+                        list[1].children[i].name = map.QXYH[i].itemCode;
+                    };
+
+                    //维修项目路由
+                    for(let i in map.WXXM){
+                        list[2].children.push(this.utils.assign(list[2].children[0]));
+                    };
+                    list[2].children.pop();
+                    for(let i in list[2].children){
+                        list[2].children[i].title = map.WXXM[i].itemName;
+                        list[2].children[i].name = map.WXXM[i].itemCode;
+                    };
+                    console.log(list);
+                    this.menuList = list;
+                    this.menuStatus = true;
+                    this.statusInit = false;
+                    this.status = true;
+                });
+            },
+            delay () {
+                if(this.strik){
+                    setTimeout(()=>{
+                        this.delayS = false;
+                    },300)
+                }else{
+                    setTimeout(()=>{
+                        this.delayS = true;
+                    },300)
+                }
+            },
+            init () {
+                let pathArr = util.setCurrentPath(this, this.$route.name);
+                this.$store.commit('updateMenulist');
+                if (pathArr.length >= 2) {
+                    this.$store.commit('addOpenSubmenu', pathArr[1].name);
+                }
+                this.userName = Cookies.get('user');
+                let messageCount = 3;
+                this.messageCount = messageCount.toString();
+                this.checkTag(this.$route.name);
+                this.$store.commit('setMessageCount', 3);
+                this.menuCofig()
+            },
+            toggleClick () {
+                this.shrink = !this.shrink;
+            },
+            handleClickUserDropdown (name) {
+                if (name === 'ownSpace') {
+                    util.openNewPage(this, 'ownspace_index');
+                    this.$router.push({
+                        name: 'ownspace_index'
+                    });
+                } else if (name === 'loginout') {
+                    // 退出登录
+                    this.post(Api.factory.quit,res=>{
+                        this.$Message.success("退出成功！");
+                        this.$store.commit('clearOpenedSubmenu');
+                        this.$store.commit('logout', this);
+                        this.$router.push({
+                            name: 'login'
+                        });
+                    })
+
+                }
+            },
+            checkTag (name) {
+                let openpageHasTag = this.pageTagsList.some(item => {
+                    if (item.name === name) {
+                        return true;
+                    }
+                });
+                if (!openpageHasTag) { //  解决关闭当前标签后再点击回退按钮会退到当前页时没有标签的问题
+                    util.openNewPage(this, name, this.$route.params || {}, this.$route.query || {});
+                }
+            },
+            handleSubmenuChange (val) {
+                /*this.status = false;
+                $Vue.nextTick(()=>{
+                    this.status = true;
+                })*/
+            },
+            beforePush (name) {
+                // if (name === 'accesstest_index') {
+                //     return false;
+                // } else {
+                //     return true;
+                // }
+                return true;
+            },
+            fullscreenChange (isFullScreen) {
+                // console.log(isFullScreen);
+            }
+        },
+        watch: {
+            '$route' (to) {
+                this.$store.commit('setCurrentPageName', to.name);
+                let pathArr = util.setCurrentPath(this, to.name);
+                if (pathArr.length > 2) {
+                    this.$store.commit('addOpenSubmenu', pathArr[1].name);
+                }
+                this.checkTag(to.name);
+                localStorage.currentPageName = to.name;
+            },
+            //这里做个延迟，避免动画出现问题
+            shrink (strik) {
+                if(strik){
+                    this.delayS = false;
+                }else{
+                    setTimeout(()=>{
+                        this.delayS = true;
+                    },200)
+                }
+            },
+            lang () {
+                util.setCurrentPath(this, this.$route.name); // 在切换语言时用于刷新面包屑
+            }
+        },
+        mounted () {
+            let _this = this;
+            this.init();
+            //监听路由点击事件刷新
+            this.Event.$on("refsh",function(name){
+                _this.status = false;
+                _this.$nextTick(()=>{
+                    _this.status = true;
+                    localStorage.setItem("currentRouter",name);
+                })
+            });
+            //处理左侧列表高度自适应
+            setTimeout(()=>{
+                $('.sidebar-menu-con').height(window.innerHeight - 120);
+            },300);
+        },
+        created () {
+            // 显示打开的页面的列表
+            this.$store.commit('setOpenedList');
+        }
+    };
+</script>

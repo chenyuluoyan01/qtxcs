@@ -1,0 +1,264 @@
+<style lang="less">
+
+</style>
+
+<template>
+    <div>
+        <div class="i-form" style="padding-top:10px;">
+            <Form  :label-width="120">
+                <div v-show='step == "1"'>
+                    <h2 class="padding-left-small main-color padding-bottom-small text">基础信息</h2>
+                    <FormItem label="服务分类：" class="formMust" >
+                       <Select v-model='formData.rel.itemCat'  style='width:200px;'>
+                         <Option v-for='(todo,i) in formData.itemCatList.list' :key='"1xd"+i' :value='todo[formData.itemCatList.listId]'>{{todo[formData.itemCatList.listName]}}</Option>
+                       </Select>
+                        <span v-if='formData.initF&&formData.rel.itemCat==""' class="error-mark">
+                        <Icon type="close-circled"></Icon> 必填
+                        </span>
+                    </FormItem>
+                    <FormItem label="项目分类：" class="formMust" v-if='itemStatus'>
+                       <Select v-model='formData.rel.itemCode'  style='width:200px;'>
+                         <Option v-for='(todo,i) in formData.itemCodeList.list' :key='"1xd"+i' :value='todo[formData.itemCodeList.listId]'>{{todo[formData.itemCodeList.listName]}}</Option>
+                       </Select>
+                        <span v-if='formData.initF&&formData.rel.itemCode == ""' class="error-mark">
+                        <Icon type="close-circled"></Icon> 必填
+                        </span>
+                    </FormItem>
+                    <FormItem label="配件品牌名称：" class="formMust">
+                       <Select v-model='formData.rel.goodsBrandId'  style='width:200px;'>
+                         <Option v-for='(todo,i) in formData.brandList.list' :key='"1xd"+i' :value='todo[formData.brandList.listId]'>{{todo[formData.brandList.listName]}}</Option>
+                       </Select>
+                        <span v-if='formData.initF&&formData.rel.goodsBrandId == ""' class="error-mark">
+                        <Icon type="close-circled"></Icon> 必填
+                        </span>
+                    </FormItem>
+                    <FormItem label="商品名：" class="formMust">
+                        <Tooltip placement="top">
+                            <Input v-model="formData.rel.goodsName" placeholder="请输入商品名称" style="width:320px;"></Input>
+                            <div slot="content" style='width:200px'>
+                                <p>命名规则：</p>
+                                <p>商品品牌+英文品牌+商品名</p>
+                                <p>+规则参数+适用车型+容量</p>
+                                <p>（装箱数），如1只装，1L装</p>
+                            </div>
+                        </Tooltip>
+                        <span v-if='formData.initF && formData.rel.goodsName == ""' class="error-mark">
+                            <Icon type="close-circled"></Icon> 必填
+                        </span>
+                    </FormItem>
+                    <FormItem label="商品图片：" class="formMust">
+                        <upload
+                            :count="formData.imgUpConfig.count"
+                            :defaultList="formData.imgUpConfig.defaultList"
+                            :fileDir='formData.imgUpConfig.fileDir'
+                            @upList="getUpList"
+                        ></upload>
+                        <span v-if='formData.initF && formData.rel.goodsPictureIdArr.length==0' class="error-mark">
+                            <Icon type="close-circled"></Icon> 必填
+                        </span>
+                        <label style="font-size:12px">*首张图片为主图，最多可上传6正图片图片尺寸800x800，大小不超过1M</label>
+                    </FormItem>
+
+                    <FormItem label="参考价：" class="formMust">
+                        <InputNumber :min='0'  v-model="formData.rel.refPrice" placeholder="请输入参考价" style="width:220px;"></InputNumber>
+                        <span v-if='formData.initF && formData.rel.refPrice == ""' class="error-mark">
+                            <Icon type="close-circled"></Icon> 必填
+                        </span>
+                    </FormItem>
+                    <FormItem label="上架：" class="formMust">
+                        <RadioGroup v-model='formData.rel.putaway'>
+                            <Radio label='N'>否</Radio>
+                            <Radio label='Y'>是</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                    <Button class='margin-left-middle' @click='step="2"' type='primary'>下一步</Button>
+                </div>
+
+
+                <Modal
+                    v-model='brandChooseConfig.modal'
+                    width="45vw"
+                    :loading='brandChooseConfig.loading'
+                    :mask-closable='false'
+                    title='选择车品牌'
+                >
+                    <brand-choose v-if='brandChooseConfig.modal' ref='choose' />
+                    <div slot="footer">
+                        <Button @click="brandChooseConfig.modal=false">返回</Button>
+                        <Button type="primary" @click='xSave'>保存</Button>
+                    </div>
+                </Modal>
+
+
+
+
+                <div v-show= 'step == "2"'>
+                    <h2 class="padding-left-small main-color padding-bottom-small text">车型匹配</h2>
+                    <FormItem label="品牌选择：" class="formMust">
+                        <Button type='primary' @click='brandChooseConfig.modal=true'>点击选择品牌</Button>
+                    </FormItem>
+                    <FormItem label="车型选择：" class="formMust">
+                        <brand-by v-if='xStatus'></brand-by>
+                    </FormItem>
+                    <Button class='margin-left-middle' @click='step="1"' type='primary'>上一步</Button>
+                </div>
+            </Form>
+        </div>
+    </div>
+</template>
+
+<script>
+import {upload} from '@/core'
+import brandBy from './sub/brandBy.vue'
+import brandChoose from './sub/brandChoose.vue'
+export default {
+    name: 'partsAdd',
+    components: {
+        upload,brandBy,brandChoose
+    },
+    watch:{
+        'formData.rel.itemCat' :function(itemCat){
+            this.get(Api.server.get,{itemCat:itemCat},(res)=>{
+                this.formData.rel.itemCode = "";
+                this.formData.itemCodeList.list = res.object[itemCat];
+                this.itemStatus = false;
+                $Vue.nextTick(()=>{
+                    this.itemStatus = true;
+                })
+            })
+        },
+        'goodType' : function(goodType){
+            this.refshTree = false;
+            $Vue.nextTick(()=>{
+                this.refshTree = true;
+            })
+        }
+    },
+    data () {
+        return {
+            configEditor:{},
+            xStatus:false,
+            brandChooseConfig:{
+               modal:false,
+               name:"brandChooseConfig",
+               loading:false
+            },
+            step:"1",
+            goodType:"carType",
+            itemStatus:true,
+            refshTree:true,
+            formData:{
+                imgUpConfig:{
+                    count:6,
+                    defaultList:[],
+                    fileDir:'goods'
+                },
+                itemCodeList:{
+                    listId:"itemCode",
+                    listName:"itemName",
+                    list:[]
+                },
+                brandList:{
+                    listId:"goodsBrandId",
+                    listName:"goodsBrandName",
+                    list:[]
+                },
+                itemCatList:{
+                    listId:"id",
+                    listName:"name",
+                    list:[
+                        {
+                            name:"保养项目",
+                            id:"BYXM"
+                        },
+                        {
+                            name:"清洗养护",
+                            id:"QXYH"
+                        },
+                        {
+                            name:"维修项目",
+                            id:"WXXM"
+                        }
+                    ]
+                },
+                initF:false,
+                rel:{
+                    goodsBrandId:"",
+                    itemCat:"",
+                    itemCode:"",
+                    goodsName:"",
+                    refPrice:0,
+                    applyAllCar:'N',
+                    putaway:'N',
+                    goodsPictureIdArr:[],
+                    goodsCardBrandIdArr:[],
+                    goodsCarIdArr:[]
+                }
+            }
+        }
+    },
+    mounted () {
+        this.getBrand();
+        this.utils.clearTypes();
+        this.xStatus = true;
+    },
+    methods: {
+        editorReady(editorInstance){
+            editorInstance.setContent('Hello world!<br>编辑初始化内容')
+        },
+        xSave(){
+            //执行了选择页面的保存
+            this.$refs.choose.save();
+            this.brandChooseConfig.modal = false;
+
+            this.xStatus = false;
+            $Vue.nextTick(()=>{
+                this.xStatus = true;
+            })
+        },
+        getUpList(url){
+            this.formData.rel.goodsPictureIdArr = this.utils.getSingleItem(url,'url');
+        },
+        getBrand(){
+            this.post(Api.goods.brand.get,(res)=>{
+                this.formData.brandList.list = res.object || [];
+            })
+        },
+        //保存
+        save(){
+            let _this = this;
+            let data = JSON.parse(JSON.stringify(this.formData.rel))
+            let typeMap = this.utils.getData("typeMap");
+            for(let o in typeMap){
+                if(typeMap[o].length>0){
+                    data.goodsCardBrandIdArr.push({"brandId":o});
+                    data.goodsCarIdArr = data.goodsCarIdArr.concat(typeMap[o])
+                };
+            };
+            let objGoodsCarIdArr = [];
+            for(let i in data.goodsCarIdArr){
+                objGoodsCarIdArr.push({cardTypeId:data.goodsCarIdArr[i]})
+            };
+            data.goodsCarIdArr = objGoodsCarIdArr;
+
+            this.utils.resolveForm(_this,()=>{
+                if(data.goodsPictureIdArr.length == 0){
+                    this.$Message.warning("请至少上传一张商品主图！");
+                    return false;
+                };
+                if(data.goodsCarIdArr.length == 0){
+                    this.$Message.warning("请至少匹配一种车型！");
+                    return false;
+                };
+                data.goodsPictureIdArr = JSON.stringify(data.goodsPictureIdArr);
+                data.goodsCarIdArr = JSON.stringify(data.goodsCarIdArr);
+                data.goodsCardBrandIdArr = JSON.stringify(data.goodsCardBrandIdArr);
+                this.post(Api.goods.insert,data,(res)=>{
+                    this.$Message.success("新增商品成功！");
+                    this.utils.refshData(_this.$parent.$parent);
+                });
+            });
+        },
+    }
+};
+</script>

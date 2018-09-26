@@ -1,0 +1,315 @@
+<template>
+  <div style="padding-top:20px;">
+    <h2 class="company" style="color:#ec681e">晴天修车商家版系统</h2>
+    <div class="login-main" style="background:rgba(255,255,255,.4);top:150px;">
+      <ul class="clear">
+        <li style="background:none">
+          <h2 style="color:#ec681e;padding-left:33px;"><Icon type="log-in"></Icon> 登录</h2>
+        </li>
+        <!-- <li class="register-lib"  @click="goRegister">
+          <span>注册</span>
+          <img src="../../../images/arrow.svg" alt="">
+        </li> -->
+      </ul>
+      <div class="login-dialog-main" style="background:none">
+        <ul class="clear">
+          <li class="login-right" style="background:none">
+            <ul class="login-right-ul"  style="background:none">
+              <li class="btn-list">
+                <label for="phone">用户名：</label>
+                <input class="text-input phone" type="tel" v-model="params.phone" id="phone" placeholder="请输入用户名">
+              </li>
+              <li class="btn-list psw-wrap" style="margin-top:10px;">
+                <label for="psw">密<span style="opacity:0">称</span>码：</label>
+                <input class="text-input" id="psw"  v-model="params.password" v-if="pswOpen" type="text" placeholder="请输入密码">
+                <input class="text-input" id="psw"  v-model="params.password" v-if="!pswOpen" type="password" placeholder="请输入密码">
+                <img @click="pswOpen=!pswOpen" v-if="pswOpen == false" src="../../../images/eye-close.png"/>
+                <img @click="pswOpen=!pswOpen" v-if="pswOpen == true" src="../../../images/eye-open.png"/>
+              </li>
+              <!-- <li class="btn-list via">
+                <label for="via">验证码：</label>
+                <input class="text-input" id="via" type="text" placeholder="验证码">
+                <div class=                     "code">
+                  <img :src="imgSrc" v-if="imgShow" @click="refresh" alt="图形验证码">
+                </div>
+              </li> -->
+              <li class="clear" style="border:0;">
+                <Checkbox class="free-login"><span>3天内自动登录</span></Checkbox>
+                <!-- <span class="forgetPsw" @click="goForget">忘记密码？</span> -->
+              </li>
+              <li style="border:0">
+                <button @click="login">登录</button>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</template>
+
+<script>
+import Vue from 'vue'
+import Cookies from 'js-cookie';
+import md5 from '../../../libs/core/utils/lib/md5str.js'
+export default {
+  name:'login',
+  data: function() {
+    return {
+      pswOpen:false,
+      imgShow:true,
+      params:{
+        phone:"",
+        password:""
+      }
+    }
+  },
+  components: {
+  },
+  mounted: function(){
+    this.inputActive()
+    this.heightAuto()
+  },
+  methods:{
+    //登录时把token信息放入到用户的localStorage里面
+    login: function(){
+      let phone = this.params.phone;
+      let password = this.params.password;
+      if(phone == ''){
+        this.$Message.warning('用户名为空！');
+        return false
+      }else if(password == ''){
+        this.$Message.warning('密码为空！');
+        return false
+      }else{
+        Cookies.set('user', phone);
+        Cookies.set('password', password);
+        //登录这里使用jq 的 ajax 就可以
+        let _this = this;
+        let data = {
+          phone:phone,
+          password:password,
+          sunnyfix_timestamp: new Date().getTime()
+        };
+        data.sunnyfix_sign = md5(Api.login,data);
+        $.post(Api.login,data,function(res){
+          if(res.code == 0){
+            localStorage.setItem("token",res.object.token);
+            localStorage.setItem("factoryId",res.object.factoryId || 19);
+            _this.$Message.success('登录成功！');
+            Cookies.set('user', phone);
+            Cookies.set('password', password);
+            _this.$router.push({
+                path: 'serverMeg/maintenanceProject'
+            });
+          }else{
+            _this.$Message.warning(res.message||'登录失败！');
+          }
+
+        })
+      }
+    },
+    //输入框激活时的交互效果
+    inputActive: function(){
+      $(".btn-list").each(function(i,item){
+      var eachItem = $(".btn-list").eq(i).find(".text-input");
+      eachItem.focus(function(){
+          $(".blue-border").removeClass("blue-border")
+          $(".btn-list").eq(i).addClass("blue-border")
+        })
+        eachItem.blur(function(){
+          $(".blue-border").removeClass("blue-border");
+        })
+      })
+    },
+    //左右两边高度自适应
+    heightAuto: function(){
+      setTimeout(function(){
+        $(".login-right").height($(".login-left").height())
+      },200)
+    },
+    goRegister: function(){
+      this.$emit("goRegister")
+    },
+    goForget: function(){
+      this.$emit("goForget")
+    },
+    refresh: function(){
+      this.imgShow = false;
+      Vue.nextTick(()=>{
+        this.imgShow = true;
+      })
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+h2{
+  line-height: 42px;
+  color: rgba(74, 144, 226, 1);
+  font-size: 22px;
+  line-height: 60px;
+}
+.ivu-checkbox-checked .ivu-checkbox-inner{
+  background-color:#ec681e!important;
+  border-color:#ec681e!important;
+}
+.company{
+  text-indent: 60px!important;
+}
+.login-main{
+  width: 400px;
+  margin: 0 auto;
+  padding: 20px 20px 30px 20px;
+  position: relative;
+  top:60px;
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow: 0px 2px 4px 0px rgba(228, 228, 228, 0.5);
+  border: 1px solid rgba(237, 233, 233, 1);
+  h2{
+    text-indent: 0;
+  }
+  ul{
+    li{
+      float: left;
+      line-height: 60px;
+    }
+    li.register-lib{
+      float: right;
+      img{
+        vertical-align: middle;
+      }
+      span{
+        color: rgba(194, 189, 189, 1);
+        font-size: 16px;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      span:hover{
+        color: #ec681e;
+      }
+    }
+  }
+}
+li.login-right{
+  background: #fff;
+  width:100%;
+  ul.login-right-ul{
+    height:100%;
+    width:80%;
+    margin:0 auto;
+    li{
+      width:100%;
+      float:none;
+      border-bottom:1px solid #D2D2D2;
+      button{
+        width:100%;
+        line-height: 32px;
+        font-size:14px;
+        cursor:pointer;
+        background: #ec681e;
+        color:#fff;
+        -webkit-transition: all .30s ease-in-out;
+        -moz-transition: all .30s ease-in-out;
+        -ms-transition: all .30s ease-in-out;
+        -o-transition: all .30s ease-in-out;
+        transition: all .30s ease-in-out;
+      }
+      button:hover{
+        background: #f78833;
+        -webkit-transition: all .30s ease-in-out;
+        -moz-transition: all .30s ease-in-out;
+        -ms-transition: all .30s ease-in-out;
+        -o-transition: all .30s ease-in-out;
+        transition: all .30s ease-in-out;
+      }
+      label{
+        display:inline-block;
+        text-align: left;
+        line-height: 25px;
+        color: rgba(41, 41, 41, 1);
+        font-size: 14px;
+      }
+      input{
+        display:inline-block;
+        height:26px;
+        width:60%;
+        line-height: 1.5;
+        font-size: 14px;
+        border:none;
+        outline: none;
+      }
+    }
+    .via{
+      margin-bottom:26px;
+      label{
+        width:24%;
+      }
+      input{
+        width:27%;
+      }
+      .code{
+        img{
+          position:relative;
+          top: 10px;
+        }
+      }
+    }
+  }
+}
+.psw-wrap{
+  img{
+    position:relative;
+    top:10px;
+    cursor:pointer;
+  }
+}
+.login-main-wrap{
+  height:100vh;
+  overflow: hidden;
+  .http-name{
+    background-color: #FDFDFD;
+    height: 800px;
+    position: relative;
+    top: -10px;
+    h2{
+      color: rgba(134, 132, 132, 1);
+      font-size: 16px;
+      text-align: center;
+      line-height:80px;
+    }
+  }
+}
+.code{
+  display: inline-block;
+  vertical-align: middle;
+  margin-left:26px;
+}
+.forgetPsw{
+  float:right;
+  color: rgba(124, 124, 124, 1);
+  font-size:12px;
+  cursor:pointer;
+  margin-top:4px;
+}
+.forgetPsw:hover {
+  color: #ec681e;
+}
+.blue-border{
+  box-shadow: 0px 4px 0px #efefef;
+  border-bottom:1px solid #ec681e!important;
+  -webkit-transition: all .30s ease-in-out;
+      -moz-transition: all .30s ease-in-out;
+      -ms-transition: all .30s ease-in-out;
+        -o-transition: all .30s ease-in-out;
+          transition: all .30s ease-in-out;
+}
+.free-login span{
+  line-height: 22px;
+  color: rgba(124, 124, 124, 1);
+  font-size:12px;
+}
+
+</style>

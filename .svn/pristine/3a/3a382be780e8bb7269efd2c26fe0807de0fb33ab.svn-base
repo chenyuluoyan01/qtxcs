@@ -1,0 +1,93 @@
+<style lang="less">
+    .lib-check{
+        padding: 10px;
+    }
+</style>
+
+<template>
+    <div class="clear">
+        <Menu @on-select='tab' theme="light" active-name="A" style='width:60px;float:left'>
+            <MenuItem  :name="index" v-for = '(item , index) in brandMap' :key='"xvs"+index'>{{index}}</MenuItem>
+        </Menu>
+        <div style="float:left"  v-for = '(item , index) in brandMap' :key='"xvf"+index' v-show='index == nowIndex'>
+            <div class="inline-block lib-check" v-for='(c,i) in item'>
+
+                <CheckboxGroup v-model='aimIds'>
+                    <Checkbox :label='c.brandId' @click.native='handleChange(c.brandId)'>{{c.brandName}}</Checkbox>
+                </CheckboxGroup>
+            </Poptip>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    name: 'brandChoose',
+    components: {
+
+    },
+    data () {
+        return {
+            aimIds:[],
+            nowIndex:"A",
+            brandMap:{
+                'A':[
+                    {
+                        brandId:25,
+                        brandName:"宝马"
+                    },
+                    {
+                        brandId:23,
+                        brandName:"大众"
+                    }
+                ],
+                'B':[
+                    {
+                        brandId:2,
+                        brandName:"奔驰"
+                    },
+                    {
+                        brandId:3,
+                        brandName:"奥迪"
+                    },
+                    {
+                        brandId:4,
+                        brandName:"上海大众"
+                    }
+                ]
+            }
+        }
+    },
+    watch:{
+        'aimIds':function(val,oldVal){
+            if(val.length<oldVal.length){
+                for(let i in oldVal){
+                    if(val.indexOf(oldVal[i]) == -1){
+                        this.$Event.$emit("delBrand",oldVal[i])
+                    }
+                }
+            }
+        }
+    },
+    mounted () {
+        //this.utils.delData("aimIds");
+        let tmp = this.utils.getData("aimIds");
+        if($.isArray(tmp)){
+            this.aimIds = tmp
+        };
+    },
+    methods: {
+        tab(index){
+            this.nowIndex = index;
+        },
+        ok(){},
+        handleChange(id){
+            //alert(id)
+        },
+        save(){
+            this.utils.setData("aimIds",this.aimIds);
+        }
+    }
+};
+</script>

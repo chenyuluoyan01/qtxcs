@@ -1,0 +1,4 @@
+﻿import ENV from './Env'
+let Host = '';
+ENV == 'DEV' ? Host = '/api/' : Host = './'
+export default Host

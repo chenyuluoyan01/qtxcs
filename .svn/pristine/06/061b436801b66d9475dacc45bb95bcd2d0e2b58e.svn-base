@@ -1,0 +1,111 @@
+<style lang="less">
+
+</style>
+
+<template>
+    <div>
+        <Select v-model = 'position.province' class='width-130'>
+            <Option v-for='(item,i) in cityList' :key='"p"+i' :value='item.name'>{{item.name}}</Option>
+        </Select>
+        <!-- 省 -->
+        <Select v-model = 'position.city' class='width-130' v-if='cityInit'>
+            <Option v-for='(citem,ci) in cList' :key='"c"+ci' :value='citem.name'>{{citem.name}}</Option>
+        </Select>
+        <!-- 市 -->
+        <Select v-model = 'position.district' class='width-130' v-if='districtInit'>
+            <Option v-for='(ditem,di) in dList' :key='"d"+di' :value='ditem'>{{ditem}}</Option>
+        </Select>
+        <!-- 区/县 -->
+    </div>
+</template>
+
+<script>
+import cityList from '@/core/city'
+export default {
+    name: 'citycross',
+    props:{
+        initP:{
+            default: ()=>{
+                return {
+                    province:"",
+                    city:"",
+                    district:""
+                }
+            }
+        }
+    },
+    watch:{
+        'position.province':function(province){
+            for(let i in cityList){
+                if(cityList[i].name == province){
+                    this.cList = cityList[i].city;
+                }
+            };
+            this.dList = [];
+            this.position.city = "";
+            this.position.district = "";
+            this.districtInit = false;
+            this.cityInit = false;
+            $Vue.nextTick(()=>{
+                this.districtInit = true;
+                this.cityInit = true;
+            })
+        },
+        'position.city': function(city){
+            if(typeof city == "string" && city.length > 0){
+
+                let province = this.position.province;
+                let city = this.position.city;
+                this.$emit('cityChange',city)
+                for(let i in cityList){
+                    if(cityList[i].name == province){
+                        for(let j in cityList[i].city){
+                            let tmp = cityList[i].city[j];
+                            if(tmp.name == city){
+                                this.dList =tmp.area;
+                                this.districtInit = false;
+                                $Vue.nextTick(()=>{
+                                    this.districtInit = true;
+                                })
+                            }
+                        }
+                    }
+                };
+            }
+        },
+    },
+    data () {
+        return {
+            cityList:cityList,
+            cityInit:true,
+            districtInit:true,
+            cList:[],
+            dList:[],
+            position:{
+                province:"",
+                city:"",
+                district:""
+            }
+        }
+    },
+    mounted () {
+        if(this.initP.province&&this.initP.city&&this.initP.province.length>0&&this.initP.city.length>0){
+            this.position.province = this.initP.province;
+            $Vue.nextTick(()=>{
+                this.position.city = this.initP.city;
+                $Vue.nextTick(()=>{
+                    this.position.district = this.initP.district;
+                })
+            });
+        };
+    },
+    methods: {
+        getCityCross(){
+            return this.position
+        }
+    },
+    components: {
+
+    }
+};
+</script>

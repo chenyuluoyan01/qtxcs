@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <link href="./dist/icon.ico" mce_href="favicon.ico" rel="bookmark" type="image/x-icon" />
+    <link href="./dist/icon.ico" mce_href="favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="./dist/icon.ico" mce_href="favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css" />
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[0] %>">
+    <link rel="stylesheet" name="theme" href="">
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=iTFrUHZGDDx2iviWfFYGAf0HTyvt6tma"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js"></script>
+
+</head>
+
+<body>
+    <div id="app"></div>
+    <div class="lock-screen-back" id="lock_screen_back"></div>
+    <script>
+        window.Host = "http://fdev.qingtianxiuche.com/sunnyfix/"
+    </script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[0] %>"></script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[1] %>"></script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[2] %>"></script>
+</body>
+
+</html>

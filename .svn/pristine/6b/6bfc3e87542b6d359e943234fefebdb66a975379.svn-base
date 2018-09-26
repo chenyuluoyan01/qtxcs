@@ -1,0 +1,155 @@
+<template>
+  <div class="bmap">
+    <div id="l-map"></div>
+    <div id="r-result">
+      <input type="text" id="suggestId" placeholder="请输入搜索关键字" size="20"/>
+    </div>
+    <div id="searchResultPanel"></div>
+  </div>
+</template>
+<script>
+  export default{
+    name: 'baiduMap',
+    props: {
+      position:{
+        type:Object,
+        default:function(){
+          return {
+            lat:null,
+            lng:null
+          }
+        }
+      },
+      city:{
+        default:"深圳"
+      }
+    },
+    methods: {},
+    watch: {
+    },
+    mounted: function(){
+      var controller = true;
+      var _this = this;
+      // 百度地图API功能
+      function G(id) {
+        return document.getElementById(id);
+      }
+      var map = new BMap.Map("l-map");
+      map.centerAndZoom(_this.city,14);
+      map.addEventListener("tilesloaded",function(){
+        if(_this.position.lat){
+          initPlace(_this.position)
+        }
+      });
+
+      //建立一个自动完成的对象
+      var ac = new BMap.Autocomplete(
+        {"input" : "suggestId"
+        ,"location" : map
+      });
+      //鼠标放在下拉列表上的事件
+    ac.addEventListener("onhighlight", function(e) {
+        var str = "";
+        var _value = e.fromitem.value;
+        var value = "";
+        if (e.fromitem.index > -1) {
+          value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        }
+        str = "FromItem<br/>index = " + e.fromitem.index + "<br />value = " + value;
+        value = "";
+        if (e.toitem.index > -1) {
+          _value = e.toitem.value;
+          value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        }
+        str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+        G("searchResultPanel").innerHTML = str;
+      });
+      var myValue;
+      ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+      var _value = e.item.value;
+        myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+        G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+        setPlace();
+      });
+
+      function setPlace(){
+        map.clearOverlays();    //清除地图上所有覆盖物
+        function myFun(){
+          var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+          map.centerAndZoom(pp, 18);
+          var marker = new BMap.Marker(pp); // 创建标注
+          map.addOverlay(marker); //添加标注
+          map.panTo(pp);
+          marker.enableDragging(); //设置可拖拽
+          //标注拖拽事件
+          marker.addEventListener("dragend", function(e) {
+            var x = e.point.lng; //经度
+            var y = e.point.lat; //纬度
+            _this.$emit("getPosition",e.point)
+          });
+          _this.$emit("getPosition",pp)
+        }
+        var local = new BMap.LocalSearch(map, { //智能搜索
+          onSearchComplete: myFun
+        });
+        local.search(myValue);
+      };
+
+      function initPlace(obj){
+        if (obj.lng != "") {
+          map.clearOverlays(); //清除地图上所有覆盖物
+          map = new BMap.Map("l-map");
+          var v_point = new BMap.Point(obj.lng, obj.lat);
+          // 初始化地图,设置城市和地图级别。
+          map.centerAndZoom(v_point, 18);
+          map.enableScrollWheelZoom(true); //启用地图滚轮放大缩小
+          ac = new BMap.Autocomplete({
+            "input": "suggestId",
+            "location": map
+          });
+          var marker = new BMap.Marker(v_point); // 创建标注
+          map.addOverlay(marker); //添加标注
+          map.panTo(v_point);
+          marker.enableDragging(); //设置可拖拽
+          //标注拖拽事件
+          marker.addEventListener("dragend", function(e) {
+            console.log(e);
+            var x = e.point.lng; //经度
+            var y = e.point.lat; //纬度
+            _this.$emit("getPosition",e.point)
+          });
+        }
+      };
+    }
+  }
+</script>
+<style>
+.bmap{
+  position:relative;
+}
+#searchResultPanel{
+  border:1px solid #C0C0C0;
+  width:240px;
+  height:auto;
+  display:none;
+  height:300px;
+  overflow-y:auto;
+}
+#suggestId{
+  width:220px;
+  border: solid 1px #ccc;
+  border-radius: 2px;
+  line-height: 28px;
+  padding: 0 5px;
+}
+#l-map{height:400px;width:600px;}
+#r-result{
+  width:100%;
+  position:absolute;
+  top: 10px;
+  left: 10px;
+}
+.BMap_pop input[type=text]{
+  width:75px!important;
+}
+</style>

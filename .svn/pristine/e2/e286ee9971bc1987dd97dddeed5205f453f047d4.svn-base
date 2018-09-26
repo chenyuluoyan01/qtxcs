@@ -1,0 +1,89 @@
+<style lang="less">
+    .page-deliver{
+        padding:20px;
+        .ivu-page{
+            float: right;
+        }
+    }
+    .demo-spin-icon-load{
+        animation: ani-demo-spin 1s linear infinite;
+    }
+    @keyframes ani-demo-spin {
+        from { transform: rotate(0deg);}
+        50%  { transform: rotate(180deg);}
+        to   { transform: rotate(360deg);}
+    }
+</style>
+
+<template>
+<div>
+    <Spin fix size="large" style='z-index:999999999999999999999999999999999' v-if='statusInit'>
+        <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
+        <div>Loading</div>
+    </Spin>
+    <div class="page-deliver clear" style="position:fixed;bottom:0;right:0;background:#fff;width:100%;">
+    <!-- show-total -->
+        <Page
+            :total="total"
+            :class-name='"clear"'
+            show-elevator
+            show-total
+            show-sizer
+            @on-change = 'getCurrentPage'
+            @on-page-size-change = 'getPageSize'
+        ></Page>
+    </div>
+</div>
+
+</template>
+
+<script>
+export default {
+    name: 'zyqtPage',
+    props: ['dataSource'],
+    data () {
+        return {
+            config:{
+                currentPage:"currentPage",
+                total:"totolSize",
+                pageSize:"pageSize"
+            },
+            pageSize:10,
+            total:0,
+            statusInit:true,
+        };
+    },
+    mounted () {
+        this.getPageData(1,true)
+    },
+    methods: {
+        getCurrentPage(currentPage){
+            this.getPageData(currentPage);
+        },
+        getPageSize(pageSize){
+            this.pageSize = pageSize;
+            this.getPageData(1,true);
+        },
+        getPageData(currentPage,sizeChange){
+            this.statusInit = true;
+            $(".view-main").scrollTop(0);
+            if (sizeChange) {this.dataSource.param [ this.config.pageSize ] = this.pageSize;};
+            this.dataSource.param [ this.config.currentPage ] = currentPage;
+            let data = this.dataSource.param;
+            let url = this.dataSource.url;
+            this.post(url,data,(res)=>{
+                if(res.pageBean && res.pageBean.currentPage == 1){
+                    this.total = res.pageBean.totolSize;
+                };
+                this.statusInit = false;
+                this.$emit("getData",res);
+            }).catch(e=>{
+                this.statusInit = false;
+            })
+        }
+    },
+    components: {
+
+    }
+};
+</script>

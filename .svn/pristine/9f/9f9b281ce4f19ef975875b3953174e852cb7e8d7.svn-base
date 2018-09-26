@@ -1,0 +1,136 @@
+﻿import Host from './Host'
+let Api = {
+  login:Host+'user/gateway.do?method=sunny.fix.user.login',
+  upload:Host+'common/gateway.do?method=sunny.fix.common.upload.picture',
+  //职位
+  role:{
+    get:Host+'platform/gatPlatform.do?method=sunny.fix.platform.role.fand',
+    insert:Host+'platform/gatPlatform.do?method=sunny.fix.platform.role.insert',
+    update:Host+'platform/gatPlatform.do?method=sunny.fix.platform.role.update',
+    freeze:Host+'platform/gatPlatform.do?method=sunny.fix.platform.role.freeze',
+    getP:Host+'platform/gatPlatform.do?method=sunny.fix.platform.role.fandRolePermission'
+  },
+  //管理员
+  userB:{
+    get:Host+'platform/gatPlatform.do?method=sunny.fix.platform.user.fand',
+    insert:Host+'platform/gatPlatform.do?method=sunny.fix.platform.user.insert',
+    update:Host+'platform/gatPlatform.do?method=sunny.fix.platform.user.update',
+    freeze:Host+'platform/gatPlatform.do?method=sunny.fix.platform.user.freeze'
+  },
+  //banner
+  banner:{
+    get:Host+'platform/gatPlatform.do?method=sunny.fix.platform.banner.fand',
+    insert:Host+'platform/gatPlatform.do?method=sunny.fix.platform.banner.insert',
+    hidden:Host+'platform/gatPlatform.do?method=sunny.fix.platform.banner.hiddn',
+    update:Host+'platform/gatPlatform.do?method=sunny.fix.platform.banner.update',
+    sorts:Host+'platform/gatPlatform.do?method=sunny.fix.platform.banner.sort',
+    delete:Host+'platform/gatPlatform.do?method=sunny.fix.platform.banner.delete',
+  },
+  //版本
+  version:{
+    get:Host+'platform/gatPlatform.do?method=sunny.fix.platform.version.fand',
+    insert:Host+'platform/gatPlatform.do?method=sunny.fix.platform.version.insert',
+    update:Host+'platform/gatPlatform.do?method=sunny.fix.platform.version.update',
+    delete:Host+'platform/gatPlatform.do?method=sunny.fix.platform.version.delete',
+  },
+  //字典
+  dictionary:{
+    get:Host+'platform/gatPlatform.do?method=sunny.fix.platform.dictionary.fand',
+    insert:Host+'platform/gatPlatform.do?method=sunny.fix.platform.dictionary.insert',
+    update:Host+'platform/gatPlatform.do?method=sunny.fix.platform.dictionary.update',
+    delete:Host+'platform/gatPlatform.do?method=sunny.fix.platform.dictionary.delete',
+  },
+  //服务
+  server:{
+    get:Host+'platformServiceItem/gatPlatformServiceItem.do?method=sunny.fix.platform.service.item.selectByPropery',
+  },
+  //汽车
+  car:{
+    brand:{
+      get:Host+'platformCardBrand/gatPlatformCardBrand.do?method=sunny.fix.platform.car.brand.selectByPropery',
+      insert:Host+'platformCardBrand/gatPlatformCardBrand.do?method=sunny.fix.platform.car.brand.insert',
+      update:Host+'platformCardBrand/gatPlatformCardBrand.do?method=sunny.fix.platform.car.brand.update',
+      delete:Host+'platformCardBrand/gatPlatformCardBrand.do?method=sunny.fix.platform.car.brand.delete',
+    },
+    manual:{
+      get:Host+'platformManual/gatPlatformManual.do?method=sunny.fix.platform.manual.selectByItemCat'
+    },
+    type:{
+      get:Host+'platformCardType/gatPlatformCardType.do?method=sunny.fix.platform.car.type.selectByPropery',
+      insert:Host+'platformCardType/gatPlatformCardType.do?method=sunny.fix.platform.car.type.insert',
+      update:Host+'platformCardType/gatPlatformCardType.do?method=sunny.fix.platform.car.type.update',
+      delete:Host+'platformCardType/gatPlatformCardType.do?method=sunny.fix.platform.car.type.delete',
+      getByBrand:Host+'platformCardType/gatPlatformCardType.do?method=sunny.fix.platform.car.type.queryCardTypeByBrand',
+      getByPrice:Host+'platformCardType/gatPlatformCardType.do?method=sunny.fix.platform.car.type.queryCardTypeByConsumptionLevel',
+    }
+  },
+  //商品
+  goods:{
+    brand:{
+      get:Host+'goods/gatGoods.do?method=sunny.fix.goods.brand.fand',
+      insert:Host+'goods/gatGoods.do?method=sunny.fix.goods.brand.insert',
+      update:Host+'goods/gatGoods.do?method=sunny.fix.goods.brand.update',
+      delete:Host+'goods/gatGoods.do?method=sunny.fix.goods.brand.delete'
+    },
+    get:Host+'goods/gatGoods.do?method=sunny.fix.goods.fand',
+    insert:Host+'goods/gatGoods.do?method=sunny.fix.goods.insert',
+    update:Host+'goods/gatGoods.do?method=sunny.fix.goods.update',
+    delete:Host+'goods/gatGoods.do?method=sunny.fix.goods.delete',
+    putaway:Host+'goods/gatGoods.do?method=sunny.fix.goods.putaway'
+  },
+  //订单
+  order:{
+    get:Host+'order/gatOrder.do?method=sunny.fix.order.userorder.fand'
+  },
+  user:{
+    carUser:{
+      get:Host+'userCar/gatUserCar.do?method=sunny.fix.user.car.selectByExample',
+      freeze:Host+'userCar/gatUserCar.do?method=sunny.fix.user.car.freeze',
+      thaw:Host+'userCar/gatUserCar.do?method=sunny.fix.user.car.thaw',
+    },
+    factory:{
+      get:Host+'factory/gatFactory.do?method=sunny.fix.factory.fand',
+      insert:Host+'factory/gatFactory.do?method=sunny.fix.factory.insert',
+    }
+  },
+  msg:{
+    mechanicsScience:{
+      get: Host+'platform/gatPlatform.do?method=sunny.fix.platform.msg.selectByPropery',
+      insert: Host+'platform/gatPlatform.do?method=sunny.fix.platform.msg.insert',
+      update: Host+'platform/gatPlatform.do?method=sunny.fix.platform.msg.update',
+      delete: Host+'platform/gatPlatform.do?method=sunny.fix.platform.msg.delete',
+    },
+    suggestion: {
+      get: Host+'platform/gatPlatform.do?method=sunny.fix.platform.suggestion.selectByExample',
+      view: Host+'platform/gatPlatform.do?method=sunny.fix.platform.suggestion.details',
+      delete: Host+'platform/gatPlatform.do?method=sunny.fix.platform.suggestion.delete',
+    },
+    league: {
+      get: Host+'user/gateway.do?method=sunny.fix.platform.user.league.list'
+    },
+    push: {
+      get: Host+'platform/gatPlatform.do?method=sunny.fix.platform.msg.push.selectByPropery',
+      insert: Host+'platform/gatPlatform.do?method=sunny.fix.platform.msg.push.insert'
+    }
+  },
+  //维修厂接口
+  factory:{
+    get: Host+'factory/gatFactory.do?method=sunny.fix.factory.fandFactory',
+    quit: Host+'factory/gatFactory.do?method=sunny.fix.factory.user.quit',
+    rush:{
+      get: Host+'factorySosSetting/gatFactorySosSetting.do?method=sunny.fix.factory.sos.setting.selectByExample',
+      dd: Host+'factorySosSetting/gatFactorySosSetting.do?method=sunny.fix.factory.sos.setting.insertSelective.dd',
+      tc: Host+'factorySosSetting/gatFactorySosSetting.do?method=sunny.fix.factory.sos.setting.insertSelective.tc',
+      ht: Host+'factorySosSetting/gatFactorySosSetting.do?method=sunny.fix.factory.sos.setting.insertSelective.ht'
+    },
+    goods:{
+      get:Host+'factory/gatFactory.do?method=sunny.fix.factory.goods.fand',
+      insert:Host+'factory/gatFactory.do?method=sunny.fix.factory.goods.insert',
+    },
+    print:{
+      get:Host+'factory/gatFactory.do?method=sunny.fix.factory.paint.fand',
+    }
+  }
+};
+
+export default Api

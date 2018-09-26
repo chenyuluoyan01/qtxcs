@@ -1,0 +1,168 @@
+import Vue from 'vue'
+import makePy from '../../getPY.js'
+let utils = {};
+utils.makePy = makePy;
+utils.getData = function( key ){
+  let data = {};
+  let tmp = localStorage.getItem(key);
+  if( tmp == null || tmp == undefined ){
+    tmp = {};
+  }else{
+    tmp = JSON.parse(tmp)
+  };
+  data = tmp;
+  return data;
+};
+
+
+utils.setData = function( key , value ) {
+  localStorage.setItem(key , JSON.stringify(value))
+}
+
+utils.delData = function( key ) {
+  localStorage.removeItem( key );
+}
+
+utils.testForm = function(){
+  if($(".error-mark").length == 0){
+      return true
+  }else{
+      return false
+  }
+};
+
+utils.resolveForm = function(_this,cb){
+    let $this = this;
+    try{
+      _this.formData.initF = true;
+      _this.$parent.$parent[_this.name].loading = true;
+    }catch(e){}
+    $Vue.nextTick(()=>{
+        if(_this.utils.testForm()){
+            cb.call($this)
+        }else{
+            _this.$Message.warning('温馨提示: 请补全表单必填项！');
+            try{
+              _this.$parent.$parent[_this.name].loading = false;
+            }catch(e){}
+        }
+    });
+};
+
+utils.refshData = function(_this){
+  _this.refsh = false;
+  $Vue.nextTick(()=>{
+      _this.refsh = true;
+  });
+};
+
+utils.setObjItem = function(arr,key,val){
+  for(let i in arr){
+    arr[i][key] = val
+  };
+  return arr
+}
+
+utils.formatDate = function(date, fmt) {
+  date = new Date(date);
+  fmt = fmt || 'yyyy-MM-dd hh:mm:ss';
+  function padLeftZero (str) {
+    return ('00' + str).substr(str.length)
+  }
+  if (/(y+)/.test(fmt)) {
+    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+  }
+  let o = {
+    'M+': date.getMonth() + 1,
+    'd+': date.getDate(),
+    'h+': date.getHours(),
+    'm+': date.getMinutes(),
+    's+': date.getSeconds()
+  }
+  for (let k in o) {
+    if (new RegExp(`(${k})`).test(fmt)) {
+      let str = o[k] + ''
+      fmt = fmt.replace(RegExp.$1, RegExp.$1.length === 1 ? str : padLeftZero(str))
+    }
+  }
+  return fmt
+}
+
+utils.getObjByKeys = function(obj1,obj2){
+  for(let o in obj1){
+    obj1[o] = obj2[o];
+  };
+  return obj1
+}
+
+utils.resolveDec = function(obj,id){
+  let key = obj.listId;
+  let value = obj.listName;
+  let list = obj.list;
+  let Dec = '';
+  for(let i in list){
+    if(list[i][key] == id){
+      Dec = list[i][value];
+    }
+  };
+  return Dec
+}
+
+utils.getSingleItem = function(obj,key){
+  let arr = [];
+  let arr1 = [];
+  for(let i in obj){
+    arr.push(obj[i][key])
+  };
+  arr = $.unique(arr);
+
+  for(let i in arr){
+    arr1[i] = {}
+  }
+  for(let i in arr){
+    arr1[i][key] = arr[i]
+  }
+  return arr1
+}
+
+utils.assign = function(obj){
+  return JSON.parse(JSON.stringify(obj))
+}
+
+utils.testPhone = function(phone){
+  let re = /(^0\d{2,3}-?\d{7,8}$)|(^1[34578]\d{9}$)/;
+  return re.test(phone)
+}
+
+utils.clearTypes = function(){
+  utils.delData("aimIds");
+  utils.delData("aimTypeId");
+  utils.delData("typeMap")
+};
+
+utils.groupBykey = function(list,key){
+  let keys = [];
+  let map = {};
+  list.map(item=>{
+    keys.push(item[key])
+  });
+  keys = $.unique(keys);
+  keys.map(e=>{
+    map[e] = [];
+  });
+  keys.map(e=>{
+    list.map(item=>{
+      if(item[key] == e){
+        map[e].push(item)
+      }
+    })
+  });
+  return map;
+};
+
+
+Vue.prototype.utils = utils;
+
+Vue.filter("formatDate",(date)=>{
+  return utils.formatDate(new Date(date), 'yyyy-MM-dd hh:mm:ss')
+})

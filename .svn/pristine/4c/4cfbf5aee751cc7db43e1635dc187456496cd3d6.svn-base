@@ -1,0 +1,244 @@
+<style lang="less">
+    .bgred {
+        background:#FFCC66;
+    }
+    .table-hover tbody tr.bgred:hover{
+        background:#FFCC66!important;
+    }
+    .table-hover tbody tr.bgred:hover td{
+        background:none!important;
+    }
+</style>
+
+<template>
+    <Row>
+        <Col span="24">
+            <Modal v-model='pictureLook'>
+                <img :src="currentUrl" style="width: 80%;margin-left:10%;margin-top:30%;">
+            </Modal>
+            <Card>
+                <z-search
+                    @getParam='getParam'
+                    :searchData='searchData'
+                    @save='Bsave'
+                    @back='Bback'
+                ></z-search>
+                <div style="max-height:60vh;overflow-y:auto;position:relative;">
+                    <table class="table table-hover">
+                        <thead>
+                            <th class="width-80">选择</th>
+                            <th style="width:180px;">商品主图</th>
+                            <th>商品名</th>
+                            <th style="width:180px;">商品价格</th>
+                            <th style="width:180px;">工时费</th>
+                        </thead>
+                        <tbody v-if='tableInit'>
+                            <tr :class='{bgred:item.error}' v-for = "(item,index) in goodsIdsCache[nowIndex]||[]" :key='index+"xc"'>
+                                <td v-if='item.old'>
+                                    已上架
+                                </td>
+                                <td v-else>
+                                    <CheckboxGroup  v-model='checkedGoodsIds'>
+                                        <Checkbox :label='item.goodsId'><span style="opacity:0">{{index+1}}</span></Checkbox>
+                                    </CheckboxGroup>
+                                </td>
+                                <td>
+                                    <img
+                                        ref='imgs'
+                                        @click='lookPic(index)'
+                                        :src='item.goodsPictureIdList | getPic'
+                                        style="width:140px;height:60px;cursor:pointer"
+                                    >
+                                </td>
+                                <td>{{item.goodsName}}</td>
+                                <td v-if='item.old'>
+                                    {{item.price}}
+                                </td>
+                                <td v-else>
+                                    <InputNumber v-model="item.price" :min='0' :step='1'></InputNumber>
+                                </td>
+                                <td v-if='item.old'>
+                                    {{item.fee}}
+                                </td>
+                                <td v-else>
+                                    <InputNumber v-model="item.fee" :min='0' :step='1'></InputNumber>
+                                </td>
+
+                            </tr>
+                            <tr v-if='goodsIdsCache[nowIndex].length == 0'><td colspan="5">暂无数据</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <z-page v-if='refsh' :dataSource='dataSource' @getData='getPageData'></z-page>
+            </Card>
+        </Col>
+    </Row>
+</template>
+
+<script>
+import {zSearch,zPage} from '@/core'
+export default {
+    name: 'bannerAdd',
+    props:["name"],
+    components: {
+        zSearch,zPage
+    },
+    data () {
+        return {
+            goodIdInit:[],
+            tableInit:false,
+            nowIndex:1,
+            totolPage:0,
+            pictureLook:false,
+            currentUrl:"",
+            refsh:false,
+            list:[],
+            goodsIdsCache:{},
+            checkedGoodsIds:[],
+            searchData:{
+                save:true,
+                back:true,
+                list:[
+                    {
+                        type:"input",
+                        name:"配件品牌名称",
+                        id:"goodsBrandName"
+                    },
+                ],
+                rel:{
+                    goodsBrandName:"",
+                }
+            },
+            dataSource:{
+                url:Api.goods.get,
+                cache:true,
+                param:{itemCode:this.$parent.itemCode}
+            },
+        }
+    },
+    mounted () {
+        //获取所有已选择的商品
+        this.post(Api.factory.goods.get,{itemCode:this.$parent.itemCode},res=>{
+            this.goodIdInit = res.object || [];
+            this.refsh = true;
+        });
+    },
+    filters: {
+        getPic: function(arr){
+            if($.isArray(arr)){
+                if(arr[0]){
+                    return arr[0].url
+                }
+            }else{
+                return ""
+            }
+        },
+    },
+    methods: {
+        lookPic: function(index){
+            this.currentUrl = this.$refs.imgs[index].src;
+            this.pictureLook = true;
+        },
+        //分页组件吐出数据
+        getPageData: function(list){
+            let pageNum = $('.ivu-page-item-active').attr("title");
+            this.nowIndex = pageNum;
+            if(this.goodsIdsCache[pageNum] == null){
+                let lists = list.object || [];
+                let listInit = this.goodIdInit;
+                lists.map(item=>{
+                    item.price = 0;
+                    item.fee = 0;
+                    item.error = false;
+                });
+                lists.map((item,index)=>{
+                    for(let i in listInit){
+                        if(item.goodsId == listInit[i].goodsId){
+                            item.old = true;
+                            item.price = 200;
+                            item.fee = 300;
+                        }
+                    }
+                });
+                this.goodsIdsCache[pageNum] = lists;
+                this.tableInit = false;
+                $Vue.nextTick(()=>{
+                    this.tableInit = true;
+                })
+            };
+        },
+        //当筛选参数改变的时候，重新触发分页组建
+        getParam: function(param){
+            let _this = this;
+            this.goodsIdsCache = {};
+            this.dataSource.param = param;
+            this.utils.refshData(_this)
+        },
+        Bsave(){
+            let goodsIds = this.checkedGoodsIds;
+            let goodsList = this.goodsIdsCache;
+            let error = false;
+            let errorPageNums = [];
+            let list = [];
+            for(let o in goodsList){
+                goodsList[o].map((todo,index)=>{
+                    goodsIds.map(id=>{
+                        if(todo.goodsId == id){
+                            if(todo.price==null||todo.fee==null||todo.price==0||todo.fee==0){
+                                todo.error = true;
+                                errorPageNums.push(o);
+                                error = true;
+                            }else{
+                                list.push({
+                                    goodsId:id,
+                                    price:todo.price,
+                                    fee:todo.fee,
+                                    itemCode:todo.itemCode,
+                                    itemCat:todo.itemCat,
+                                    factoryId:6
+                                })
+                            };
+                        };
+                    })
+                })
+            };
+            if(error){
+                let msg = "";
+                errorPageNums = $.unique(errorPageNums);
+                errorPageNums.map(num=>{
+                    msg+=`第${num}页、`
+                });
+                msg+="存在未完成数据，请完善后保存！"
+                this.$Notice.warning({
+                    title: '温馨提示',
+                    render: h => {
+                        return h('p',{
+                            style:{
+                                fontSize:"14px",
+                                color:"#555",
+                                lineHeight:"36px;"
+                            }
+                        },msg)
+                    }
+                });
+                this.tableInit = false;
+                $Vue.nextTick(()=>{
+                    this.tableInit = true;
+                })
+            }else{
+                let data = {
+                    factoryGoodsList:JSON.stringify(list)
+                };
+                this.post(Api.factory.goods.insert,data,(res)=>{
+                    this.$Message.success("新增汽修厂商品成功！");
+                    this.Bback();
+                });
+            };
+        },
+        Bback(){
+            this.$parent.pageStatus = "view";
+        },
+        getParam(){},
+    }
+};
+</script>

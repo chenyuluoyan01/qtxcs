@@ -1,0 +1,35 @@
+<style lang="less">
+</style>
+
+<template>
+    <Poptip
+        confirm
+        title="确定要删除吗?"
+        style="text-align:left"
+        @on-ok="del"
+    >
+        <span class="btn">删除</span>
+    </Poptip>
+</template>
+
+<script>
+export default {
+    name: 'zyqtDel',
+    props:[],
+    data () {
+        return {
+            modal:false
+        };
+    },
+    mounted () {
+    },
+    methods: {
+        del: function(){
+            this.$emit("del")
+        }
+    },
+    components: {
+
+    }
+};
+</script>
